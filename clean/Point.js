@@ -1,0 +1,46 @@
+;(function(Class,root){
+	var Point=new Class({
+		klass:"Point"
+	});
+	Point.implement({
+		init:function(target){
+			var supportTouch='ontouchstart' in root,
+				start=supportTouch?'touchstart':'mousedown',
+				move=supportTouch?'touchmove':'mousemove',
+				end=supportTouch?'touchup':'mouseup';
+			this.isPressed=false;
+			this.x=null;
+			this.y=null;
+			target.addEventListener(start,function(){
+				this.isPressed=true;
+			}.bind(this),false);
+			target.addEventListener(move,function(e){
+				var x,y,xy=e.touches?e.touches[0]:e,
+					tx=0,
+					ty=0,cur=target;
+				if(xy.pageX||xy.pageY){
+					x=xy.pageX;
+					y=xy.pageY;
+				}else{
+					x=x.clientX+document.body.scrollLeft+document.documentElement.scrollLeft;
+					y=x.clientY+document.body.scrollTop+document.documentElement.scrollTop;
+				}
+				while(cur.offsetParent){
+					tx+=cur.offsetLeft;
+					ty+=cur.offsetTop;
+					cur=cur.offsetParent;
+				}
+				x-=tx;
+				y-=ty;
+				this.x=x;
+				this.y=y;
+			}.bind(this),false);
+			target.addEventListener(end,function(){
+				this.isPressed=false;
+				this.x=null;
+				this.y=null;
+			},false);
+		}
+	});
+	root.Point=Point;
+}(Class,this));
